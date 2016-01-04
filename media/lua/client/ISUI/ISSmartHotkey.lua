@@ -96,9 +96,10 @@ local function interactWithWindow(_player, _adjacent)
     if window:isSmashed() and not window:isGlassRemoved() then
         ISTimedActionQueue.add(ISRemoveBrokenGlass:new(_player, window, cleanTime));
         return true;
-    elseif window:canClimbThrough(_player) then
+    elseif window:getZ() == 0 and window:canClimbThrough(_player) then
         _player:climbThroughWindow(window);
         return true;
+    -- TODO: Else Add sheet rope if inventory contains sheet rope, window Z is >= 1 and window is open
     end
 
     if position:Is(IsoFlagType.exterior) and not window:isDestroyed() and not window:isSmashed() then
@@ -125,6 +126,8 @@ local function interactWithSheetRope(_player)
     return false;
 end
 
+-- Window, if second floor, missing sheetrope? add sheet rope
+-- Window, if second floor, has sheet rope? climb down
 -- Window, if interior add or remove sheet
 -- Window, if closed smash
 -- Window, if broken, remove glass
