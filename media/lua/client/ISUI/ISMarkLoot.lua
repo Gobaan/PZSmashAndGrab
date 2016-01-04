@@ -43,7 +43,9 @@ end
 ISMarkItems.oldTransferAction = ISMarkItems.oldTransferAction or ISInventoryTransferAction.perform
 function ISInventoryTransferAction:perform() 
     ISMarkItems.oldTransferAction(self)
-    self.character:getXp():AddXP(Perks.Nimble, 0.1);
+    local w = self.item:getActualWeight();
+    if w > 3 then w = 3; end;
+    self.character:getXp():AddXP(Perks.Nimble, w * 0.1);
 end
 
 -- Add Quick Loot Button to inventory tabs
@@ -94,7 +96,6 @@ ISMarkItems.createWorld = ISMarkItems.createWorld or createWorld
 function createWorld(text)
     ISMarkItems.createWorld(text)
     saveName = "saves/ISMarkLoot_"..text
-    print ("World created:", saveName)
 end
 
 -- TODO: This may not work for multiplayer, I haven't had the chance to test it :( PLEASE RITO PROVIDE ME FRIENDS
@@ -106,7 +107,6 @@ function WorldScreen:clickPlay()
     local sel = self.listbox.items[self.listbox.selected];
     if not sel then return; end
     saveName = "saves/ISMarkLoot_"..sel.text
-    print ("Clicked Play:", saveName)
 end
 
 -- Load the list of items that are being junked

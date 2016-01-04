@@ -2,17 +2,9 @@ ISSmartHotkey = {};
 
 function ISSmartHotkey.onKeyPress (_keyPressed)
     if (_keyPressed ~= 19) then return; end
-    print ("Key pressed", _keyPressed)
     local player = getSpecificPlayer(0);    -- Java: get player one
     if not player then return; end
     ISSmartHotkey.interact (player)
-end
-
-ISSmartHotkey.oldRemoveGlass = ISSmartHotkey.oldRemoveGlass or ISRemoveBrokenGlass.perform
-function ISRemoveBrokenGlass:perform()
-    print ("Removing glass")
-    ISSmartHotkey.oldRemoveGlass(self)
-    self.character:getXp():AddXP(Perks.Nimble, 10);
 end
 
 local function createIndex(_table)
@@ -143,6 +135,12 @@ end
 function ISSmartHotkey.interact (_player)
     local adjacent = ISSmartHotkey.getAdjacentSquares(_player);
     return interactWithSheetRope(_player) or interactWithWindow(_player, adjacent);
+end
+
+ISSmartHotkey.oldRemoveGlass = ISSmartHotkey.oldRemoveGlass or ISRemoveBrokenGlass.perform
+function ISRemoveBrokenGlass:perform()
+    ISSmartHotkey.oldRemoveGlass(self)
+    self.character:getXp():AddXP(Perks.Nimble, 5);
 end
 
 Events.OnKeyPressed.Add(ISSmartHotkey.onKeyPress);
