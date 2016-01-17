@@ -1,35 +1,35 @@
-ISMarkItems = {};
+SmashAndGrabMarkItems = {};
 local markedItems = {};
 local saveName = "";
 
 -- This will create a new context menu entry to grab or ungrab items
-function ISMarkItems.createMenu(_player, _context, _items)
+function SmashAndGrabMarkItems.createMenu(_player, _context, _items)
     if not _items then return; end
     
     -- Iterate through all clicked items
     for _, entry in ipairs(_items) do
-        if not markedItems[ISMarkItems.getName(entry, _player)] then
-            _context:addOption("Mark As Junk", _items, ISMarkItems.onMarkItem, _player);
+        if not markedItems[SmashAndGrabMarkItems.getName(entry, _player)] then
+            _context:addOption("Mark As Junk", _items, SmashAndGrabMarkItems.onMarkItem, _player);
             return;
         end
     end
 
-    _context:addOption("Unmark As Junk", _items, ISMarkItems.onUnmarkItem, _player);
+    _context:addOption("Unmark As Junk", _items, SmashAndGrabMarkItems.onUnmarkItem, _player);
 end
 
-function ISMarkItems.onMarkItem(_items, _player)
+function SmashAndGrabMarkItems.onMarkItem(_items, _player)
     for _, item in ipairs(_items) do
-        markedItems[ISMarkItems.getName(item, _player)] = true;
+        markedItems[SmashAndGrabMarkItems.getName(item, _player)] = true;
     end
 end
 
-function ISMarkItems.onUnmarkItem(_items, _player)
+function SmashAndGrabMarkItems.onUnmarkItem(_items, _player)
     for _, item in ipairs(_items) do
-        markedItems[ISMarkItems.getName(item, _player)] = nil;
+        markedItems[SmashAndGrabMarkItems.getName(item, _player)] = nil;
     end
 end
 
-function ISMarkItems.getName(_item, _player) 
+function SmashAndGrabMarkItems.getName(_item, _player) 
     if instanceof(_item, "InventoryItem") then
         return _player .. _item:getName();
     elseif type(_item) == "table" then
@@ -40,18 +40,14 @@ function ISMarkItems.getName(_item, _player)
 end
 
 -- Add XP for transfering items
-ISMarkItems.oldTransferAction = ISMarkItems.oldTransferAction or ISInventoryTransferAction.perform
-function ISInventoryTransferAction:perform() 
-    ISMarkItems.oldTransferAction(self)
+function SmashAndGrabMarkItems.postInventoryTransfer(self) 
     local w = self.item:getActualWeight();
     if w > 3 then w = 3; end;
     self.character:getXp():AddXP(Perks.Nimble, w * 0.1);
 end
 
 -- Add Quick Loot Button to inventory tabs
-ISMarkItems.oldCreateChildren = ISMarkItems.oldCreateChildren or ISInventoryPage.createChildren
-function ISInventoryPage:createChildren()
-    ISMarkItems.oldCreateChildren(self)
+function SmashAndGrabMarkItems.postCreateChildren(self)
     if self.onCharacter then return; end
 
     function lootUseful()
@@ -64,7 +60,7 @@ function ISInventoryPage:createChildren()
 
        for i = 0, it:size()-1 do
            local item = it:get(i);
-           if not markedItems[ISMarkItems.getName(item, self.player)] then 
+           if not markedItems[SmashAndGrabMarkItems.getName(item, self.player)] then 
                local lootAction = ISInventoryTransferAction:new(
                     getSpecificPlayer(self.player), 
                     item, 
@@ -92,25 +88,19 @@ end
 
 
 -- Find out save files name (Core.getGameWorld is broken and loads the previous saves value)
-ISMarkItems.createWorld = ISMarkItems.createWorld or createWorld
-function createWorld(text)
-    ISMarkItems.createWorld(text)
+function SmashAndGrabMarkItems.preCreateWorld(text)
     saveName = "saves/ISMarkLoot_"..text
 end
 
 -- TODO: This may not work for multiplayer, I haven't had the chance to test it :( PLEASE RITO PROVIDE ME FRIENDS
--- TODO: I should make these just trigger events that are then registered 
--- that way the logic is decouples from the hack
-ISMarkItems.oldClickPlay = ISMarkItems.oldClickPlay or WorldScreen.clickPlay
-function WorldScreen:clickPlay()
-    ISMarkItems.oldClickPlay(self)
+function SmashAndGrabMarkItems.postClickPlay(self)
     local sel = self.listbox.items[self.listbox.selected];
     if not sel then return; end
-    saveName = "saves/ISMarkLoot_"..sel.text
+    saveName = "saves/ISMarkLoot_"..sel.item.saveName
 end
 
 -- Load the list of items that are being junked
-function ISMarkItems.onLoad()
+function SmashAndGrabMarkItems.onLoad()
     local reader = getModFileReader("SmashAndGrab", saveName, true)
     local text = reader and reader:readLine() or '{}'
     markedItems = JSON:decode(text)
@@ -118,16 +108,34 @@ function ISMarkItems.onLoad()
 end
 
 -- Unload list of items being junked
-function ISMarkItems.onSave()
+function SmashAndGrabMarkItems.onSave()
     if not markedItems then return; end
     local text = JSON:encode(markedItems)
     local writer = getModFileWriter("SmashAndGrab", saveName, true, false)
-    if not writer then return; end;
+    if not writer then 
+        print ("SmashAndGrab: Error: Failed to save file " .. saveName)
+        return; 
+    end;
     writer:write(text)
     writer:close()
 end
 
+function SmashAndGrabMarkItems.preContinue(gameMode, name)
+    saveName = "saves/ISMarkLoot_"..name
+end
+
 -- Call our function when the event is fired
-Events.OnFillInventoryObjectContextMenu.Add(ISMarkItems.createMenu);
-Events.OnSave.Add(ISMarkItems.onSave)
-Events.OnGameStart.Add(ISMarkItems.onLoad)
+SmashAndGrabCustomEvent.addListener("createWorld")
+SmashAndGrabCustomEvent.addListener("LoadGameScreen:clickPlay")
+SmashAndGrabCustomEvent.addListener("ISInventoryPage.createChildren")
+SmashAndGrabCustomEvent.addListener("ISInventoryTransferAction.perform")
+SmashAndGrabCustomEvent.addListener("MainScreen.continueLatestSave")
+
+Events.OnFillInventoryObjectContextMenu.Add(SmashAndGrabMarkItems.createMenu);
+Events.OnSave.Add(SmashAndGrabMarkItems.onSave)
+Events.OnGameStart.Add(SmashAndGrabMarkItems.onLoad)
+Events.precreateWorld.Add(SmashAndGrabMarkItems.preCreateWorld)
+Events.postLoadGameScreen_clickPlay.Add(SmashAndGrabMarkItems.postClickPlay)
+Events.postISInventoryTransferAction_perform.Add(SmashAndGrabMarkItems.postInventoryTransfer)
+Events.postISInventoryPage_createChildren.Add(SmashAndGrabMarkItems.postCreateChildren)
+Events.preMainScreen_continueLatestSave.Add(SmashAndGrabMarkItems.preContinue)

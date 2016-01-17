@@ -1,12 +1,12 @@
-UIRemoveWalkTo = {};
+SmashAndGrabWalkTo = {};
 
 -- See the OnFillWorldObjectContextMenu for event details
-function UIRemoveWalkTo.removeWalkTo(_player, _context, _worldobjects, test)
-    if test == true then return true; end
-    UIRemoveWalkTo.removeOption(_context, getText("ContextMenu_Walk_to"))
+function SmashAndGrabWalkTo.removeWalkTo(_player, _context, _worldobjects, test)
+    if test then return true; end
+    SmashAndGrabWalkTo.removeOption(_context, getText("ContextMenu_Walk_to"))
 end
 
-function UIRemoveWalkTo.removeOption(_context, name)
+function SmashAndGrabWalkTo.removeOption(_context, name)
     local menu = nil;
     local options = {};
     local numOptions = 1;
@@ -31,4 +31,4 @@ function UIRemoveWalkTo.removeOption(_context, name)
     return menu;
 end
 
-Events.OnFillWorldObjectContextMenu.Add(UIRemoveWalkTo.removeWalkTo);
+Events.OnFillWorldObjectContextMenu.Add(SmashAndGrabWalkTo.removeWalkTo);
