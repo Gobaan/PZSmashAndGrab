@@ -16,18 +16,23 @@ This mod provides the following features
 
 # For modders
 The code is mostly self explanatory. Use the SmashAndGrabCustomEvent.addListener(functionName) to create listeners for any function
-e.g. SmashAndGrabCustomEvent.addListener("LoadGameScreen:clickPlay")
+e.g. 
+```
+SmashAndGrabCustomEvent.addListener("LoadGameScreen:clickPlay")
+```
 
 Then create a function (no methods, so the self parameter must be explicit) to be called during when an event is fired. e.g.
-
+```
 printMe = function(self) 
     print (self.text)
 end
+```
 
 Then add a listener to a pre or post event by calling the respective manager e.g.
-
+```
 Events.preLoadGameScreen_clickPlay.Add(printMe)
 Events.postLoadGameScreen_clickPlay.Add(printMe)
+```
 
 # See Code to Learn
 - How to add persist mod changes and data for save files between loads/continue
