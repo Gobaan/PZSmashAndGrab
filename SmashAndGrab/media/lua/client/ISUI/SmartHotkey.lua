@@ -1,12 +1,8 @@
 SmashAndGrabSmartHotkey = {};
 local hotkey = 19 -- 'r'
-
-function SmashAndGrabSmartHotkey.onKeyPress (_keyPressed)
-    if (_keyPressed ~= hotkey) then return; end
-    local player = getSpecificPlayer(0);    -- Java: get player one
-    if not player then return; end
-    SmashAndGrabSmartHotkey.interact (player)
-end
+local baseTime = 100
+local skillBonus = 10
+local cleaningXP = 5
 
 local function canAddSheetRope(_player, _position, _window)
     return _window ~= nil and _window:canAddSheetRope() and _position:getZ() > 0 and _window:getBarricade() == 0 and (_player:getInventory():getNumberOfItem("SheetRope") >= _window:countAddSheetRope() or _player:getInventory():getNumberOfItem("Rope") >= _window:countAddSheetRope()) and _player:getInventory():contains("Nails") 
@@ -29,9 +25,9 @@ end
 local function interactWithWindow(_player, _adjacent)
     local position = _player:getCurrentSquare();
     local window = position:getWindowTo(_adjacent["N"]);
-    local cleanTime = 100 - 10 * _player:getPerkLevel(Perks.Nimble)
-    if cleanTime <= 10 then
-        cleanTime = 10
+    local cleanTime = baseTime - skillBonus * _player:getPerkLevel(Perks.Nimble)
+    if cleanTime <= skillBonus then
+        cleanTime = skillBonus
     end
 
     if window == nil or not SmashAndGrabPlayerUtils.Aligned(position, window) or window:getBarricade() ~= 0 then return false; end
@@ -64,6 +60,13 @@ local function interactWithWindow(_player, _adjacent)
     return false;
 end
 
+function SmashAndGrabSmartHotkey.onKeyPress (_keyPressed)
+    if (_keyPressed ~= hotkey) then return; end
+    local player = getSpecificPlayer(0);    -- Java: get player one
+    if not player then return; end
+    SmashAndGrabSmartHotkey.interact(player)
+end
+
 -- Window, if floor > 1, missing sheetrope? add sheet rope
 -- Window, if floor > 1, has sheet rope? climb down
 -- Window, if closed and interior add or remove sheet
@@ -81,7 +84,7 @@ function SmashAndGrabSmartHotkey.interact (_player)
 end
 
 function SmashAndGrabSmartHotkey.removeBrokenGlass(self)
-    self.character:getXp():AddXP(Perks.Nimble, 5);
+    self.character:getXp():AddXP(Perks.Nimble, cleaningXP);
 end
 
 SmashAndGrabCustomEvent.addListener("ISRemoveBrokenGlass:perform")
