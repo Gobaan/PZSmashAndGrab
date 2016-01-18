@@ -38,3 +38,10 @@ Events.postLoadGameScreen_clickPlay.Add(printMe)
 - How to add persist mod changes and data for save files between loads/continue
 - How to attach events to arbitrary lua functions
 - How to detect cells around a player
+
+# Credit
+
+- Project Zomboid team 
+- RoboMat for his tutorials
+- http://www.inmyshortsleeve.com/2012/03/22/jiberish-abstractmall-smash-and-grab/ for their artwork 
+
