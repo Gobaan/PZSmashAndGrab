@@ -1,6 +1,8 @@
 SmashAndGrabQuickLoot = {};
 local markedItems = {};
 local configName = "";
+local fetchSpeedBonus = 0.1 
+local lootXPMultiplier = 0.1
 
 local function getName(_item, _player) 
     if instanceof(_item, "InventoryItem") then
@@ -41,18 +43,18 @@ end
 function SmashAndGrabQuickLoot.addXPForTransferring(self) 
     local w = self.item:getActualWeight();
     if w > 3 then w = 3; end;
-    self.character:getXp():AddXP(Perks.Nimble, w * 0.1);
+    self.character:getXp():AddXP(Perks.Nimble, w * lootXPMultiplier);
 end
 
 function SmashAndGrabQuickLoot.addQuickLootButton(self)
     if self.onCharacter then return; end
 
     function lootUseful()
-       local speed = 1.0 - (0.1 * getSpecificPlayer(self.player):getPerkLevel(Perks.Nimble))
+       local speed = 1.0 - (fetchSpeedBonus * getSpecificPlayer(self.player):getPerkLevel(Perks.Nimble))
        local it = self.inventoryPane.inventory:getItems();
 
-       if speed < 0.1 then
-           speed = 0.1
+       if speed < fetchSpeedBonus then
+           speed = fetchSpeedBonus
        end
 
        for i = 0, it:size()-1 do
@@ -74,25 +76,18 @@ function SmashAndGrabQuickLoot.addQuickLootButton(self)
        getPlayerInventory(self.player).inventoryPane.selected = {}; 
     end
 
-    self.lootMarked = ISButton:new(85, -1, 50, 14, "Quick Loot", self, lootUseful);
-    self.lootMarked:initialise();
-    self.lootMarked.borderColor.a = 0.0;
-    self.lootMarked.backgroundColor.a = 0.0;
-    self.lootMarked.backgroundColorMouseOver.a = 0.7;
-    self:addChild(self.lootMarked);
-    self.lootMarked:setVisible(true);
+    ISInventoryPage.lootAll = lootUseful
 end
 
-
 function SmashAndGrabQuickLoot.getSaveName(text)
-    configName = "saves/ISMarkLoot_"..text
+    configName = "saves/QuickLoot_"..text
 end
 
 -- TODO: This may not work for multiplayer, I haven't had the chance to test it :( PLEASE RITO PROVIDE ME FRIENDS
 function SmashAndGrabQuickLoot.getConfigLoadedName(self)
     local sel = self.listbox.items[self.listbox.selected];
     if not sel then return; end
-    configName = "saves/ISMarkLoot_"..sel.item.configName
+    configName = "saves/QuickLoot_"..sel.item.configName
 end
 
 function SmashAndGrabQuickLoot.loadConfig()
@@ -115,7 +110,7 @@ function SmashAndGrabQuickLoot.saveConfig()
 end
 
 function SmashAndGrabQuickLoot.getContinuedSaveName(gameMode, name)
-    configName = "saves/ISMarkLoot_"..name
+    configName = "saves/QuickLoot_"..name
 end
 
 -- Call our function when the event is fired
@@ -131,5 +126,5 @@ Events.OnGameStart.Add(SmashAndGrabQuickLoot.loadConfig)
 Events.precreateWorld.Add(SmashAndGrabQuickLoot.getSaveName)
 Events.postLoadGameScreen_clickPlay.Add(SmashAndGrabQuickLoot.getConfigLoadedName)
 Events.postISInventoryTransferAction_perform.Add(SmashAndGrabQuickLoot.addXPForTransferring)
-Events.postISInventoryPage_createChildren.Add(SmashAndGrabQuickLoot.addQuickLootButton)
+Events.preISInventoryPage_createChildren.Add(SmashAndGrabQuickLoot.addQuickLootButton)
 Events.preMainScreen_continueLatestSave.Add(SmashAndGrabQuickLoot.getContinuedSaveName)
