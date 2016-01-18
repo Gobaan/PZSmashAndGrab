@@ -44,6 +44,7 @@ local function getRelativeCell(_position, _direction)
     return getCell():getGridSquare(currentX + xMod, currentY + yMod, currentZ);
 end
 
+-- TODO: Future version should just tack a string N, W, S, E, NNW, NWW, WWN, and generate the final cell
 -- Gets an adjacency list where coordinates are relative to the direction of the player, north being where they are facing
 SmashAndGrabPlayerUtils.getAdjacentSquares = function (_player)
     local position = _player:getCurrentSquare();

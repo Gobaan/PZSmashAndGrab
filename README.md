@@ -30,6 +30,6 @@ Events.preLoadGameScreen_clickPlay.Add(printMe)
 Events.postLoadGameScreen_clickPlay.Add(printMe)
 
 # See Code to Learn
-- How to add persist changes and data for save files between loads/continue
-- How to attach events to arbitrary lua files
+- How to add persist mod changes and data for save files between loads/continue
+- How to attach events to arbitrary lua functions
 - How to detect cells around a player
