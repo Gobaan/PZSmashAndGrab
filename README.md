@@ -3,7 +3,7 @@ Does stealth bore you? Do you want to smash windows, loot houses, and run away b
 
 # Installation instructions
 Download the repository
-Copy files to '~/Zomboid/mods'  (OsX) or 'C:\Users\YOURUSERNAME\Zomboid\mods' (Windows)
+Copy SmashAndGrab to '~/Zomboid/mods'  (OsX) or 'C:\Users\YOURUSERNAME\Zomboid\mods' (Windows)
 
 # Functionality
 This mod provides the following features
