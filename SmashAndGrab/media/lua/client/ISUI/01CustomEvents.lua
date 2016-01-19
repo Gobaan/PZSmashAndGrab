@@ -1,4 +1,4 @@
-SmashAndGrabCustomEvent = {};
+SmashAndGrabCustomEvent = {}
 SmashAndGrabCustomEvent.registeredFunctions = {}
 SmashAndGrabCustomEvent.prelisteners = {}
 SmashAndGrabCustomEvent.postlisteners = {}

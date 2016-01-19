@@ -1,4 +1,4 @@
-SmashAndGrabSmartHotkey = {};
+SmashAndGrabSmartHotkey = {}
 local hotkey = 19 -- 'r'
 local baseTime = 100
 local skillBonus = 10
@@ -9,61 +9,61 @@ local function canAddSheetRope(_player, _position, _window)
 end
 
 local function interactWithSheetRope(_player, _adjacent)
-    local position = _player:getCurrentSquare();
-    local window = position:getWindowTo(_adjacent["N"]);
+    local position = _player:getCurrentSquare()
+    local window = position:getWindowTo(_adjacent["N"])
 
     if window and window:haveSheetRope() then
-        _player:climbThroughWindow(window);
-        return true;
+        _player:climbThroughWindow(window)
+        return true
     elseif _player:canClimbSheetRope(position) then
         ISTimedActionQueue.add(ISClimbSheetRopeAction:new(_player, false))
-        return true;
+        return true
     end
-    return false;
+    return false
 end
 
 local function interactWithWindow(_player, _adjacent)
-    local position = _player:getCurrentSquare();
-    local window = position:getWindowTo(_adjacent["N"]);
+    local position = _player:getCurrentSquare()
+    local window = position:getWindowTo(_adjacent["N"])
     local cleanTime = baseTime - skillBonus * _player:getPerkLevel(Perks.Nimble)
     if cleanTime <= skillBonus then
         cleanTime = skillBonus
     end
 
-    if window == nil or not SmashAndGrabPlayerUtils.Aligned(position, window) or window:getBarricade() ~= 0 then return false; end
+    if window == nil or not SmashAndGrabPlayerUtils.Aligned(position, window) or window:getBarricade() ~= 0 then return false end
     local targetSquare = position:Is(IsoFlagType.exterior) and window:getSquare() or window:getIndoorSquare()
     if not luautils.walkAdjWindowOrDoor(_player, targetSquare, window) then 
         return false
     end
 
     if window:isSmashed() and not window:isGlassRemoved() then
-        ISTimedActionQueue.add(ISRemoveBrokenGlass:new(_player, window, cleanTime));
+        ISTimedActionQueue.add(ISRemoveBrokenGlass:new(_player, window, cleanTime))
         return true
     elseif window:getZ() == 0 and window:canClimbThrough(_player) then
-        _player:climbThroughWindow(window);
+        _player:climbThroughWindow(window)
         return true
     elseif canAddSheetRope(_player, position, window) then
-        ISTimedActionQueue.add(ISAddSheetRope:new(_player, window));
+        ISTimedActionQueue.add(ISAddSheetRope:new(_player, window))
         return true
     end
 
     if position:Is(IsoFlagType.exterior) and not window:isDestroyed() and not window:isSmashed() then
-        _player:smashWindow(window);
-        return true;
+        _player:smashWindow(window)
+        return true
     elseif window:HasCurtains() then
-        ISTimedActionQueue.add(ISOpenCloseCurtain:new(_player, window:HasCurtains(), 0));
-        return true;
+        ISTimedActionQueue.add(ISOpenCloseCurtain:new(_player, window:HasCurtains(), 0))
+        return true
     elseif _player:getInventory():contains("Sheet") then
-        ISTimedActionQueue.add(ISAddSheetAction:new(_player, window, 50));
-        return true;
+        ISTimedActionQueue.add(ISAddSheetAction:new(_player, window, 50))
+        return true
     end 
-    return false;
+    return false
 end
 
 function SmashAndGrabSmartHotkey.onKeyPress (_keyPressed)
-    if (_keyPressed ~= hotkey) then return; end
-    local player = getSpecificPlayer(0);    -- Java: get player one
-    if not player then return; end
+    if (_keyPressed ~= hotkey) then return end
+    local player = getSpecificPlayer(0)    -- Java: get player one
+    if not player then return end
     SmashAndGrabSmartHotkey.interact(player)
 end
 
@@ -79,14 +79,14 @@ end
 -- (TODO) Investigate LUA Utils getNextTiles for zombie scanning
 -- (TODO) Door, thump dooor? lockpick? crowbar?
 function SmashAndGrabSmartHotkey.interact (_player)
-    local adjacent = SmashAndGrabPlayerUtils.getAdjacentSquares(_player);
-    return interactWithSheetRope(_player, adjacent) or interactWithWindow(_player, adjacent);
+    local adjacent = SmashAndGrabPlayerUtils.getAdjacentSquares(_player)
+    return interactWithSheetRope(_player, adjacent) or interactWithWindow(_player, adjacent)
 end
 
 function SmashAndGrabSmartHotkey.removeBrokenGlass(self)
-    self.character:getXp():AddXP(Perks.Nimble, cleaningXP);
+    self.character:getXp():AddXP(Perks.Nimble, cleaningXP)
 end
 
 SmashAndGrabCustomEvent.addListener("ISRemoveBrokenGlass:perform")
 Events.preISRemoveBrokenGlass_perform.Add(SmashAndGrabSmartHotkey.removeBrokenGlass)
-Events.OnKeyPressed.Add(SmashAndGrabSmartHotkey.onKeyPress);
+Events.OnKeyPressed.Add(SmashAndGrabSmartHotkey.onKeyPress)
