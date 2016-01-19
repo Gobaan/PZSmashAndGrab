@@ -6,6 +6,10 @@ Does stealth bore you? Do you want to smash windows, loot houses, and run away b
 https://youtu.be/54AShcRr4KE
 
 # Installation instructions
+Steam Workshop http://steamcommunity.com/sharedfiles/filedetails/?id=603863176
+
+otherwise 
+
 Download the repository
 Copy SmashAndGrab to '~/Zomboid/mods'  (OsX) or 'C:\Users\YOURUSERNAME\Zomboid\mods' (Windows)
 
@@ -25,7 +29,7 @@ e.g.
 SmashAndGrabCustomEvent.addListener("LoadGameScreen:clickPlay")
 ```
 
-Then create a function (no methods, so the self parameter must be explicit) to be called during when an event is fired. e.g.
+Then create a function (no methods, so the self parameter must be explicit) to be called when an event is fired. e.g.
 ```
 printMe = function(self) 
     print (self.text)
