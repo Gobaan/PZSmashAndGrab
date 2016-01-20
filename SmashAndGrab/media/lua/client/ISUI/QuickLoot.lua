@@ -87,7 +87,7 @@ end
 function SmashAndGrabQuickLoot.getConfigLoadedName(self)
     local sel = self.listbox.items[self.listbox.selected]
     if not sel then return end
-    configName = "saves/QuickLoot_"..sel.item.configName
+    configName = "saves/QuickLoot_"..sel.item.saveName
 end
 
 function SmashAndGrabQuickLoot.loadConfig()
