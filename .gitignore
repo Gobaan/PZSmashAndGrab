@@ -41,3 +41,4 @@ luac.out
 
 # OSX
 .DS_Store
+*.swp

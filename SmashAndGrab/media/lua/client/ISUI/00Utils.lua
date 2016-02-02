@@ -8,9 +8,24 @@ SmashAndGrabUtils.removeValue = function( t, value )
     end
 end
 
-SmashAndGrabUtils.print_r = function( t )  
+SmashAndGrabUtils.print_keys = function ( t )
+	for k, v in ipairs(t) do
+		print (k, v)
+	end
+end
+
+SmashAndGrabUtils.print_r = function( t, depth )  
+  	if not depth then 
+		depth = 1
+	end
+
     local print_r_cache={}
-    local function sub_print_r(t,indent)
+    local function sub_print_r(t,indent, depth)
+        if depth == 0 then
+			print (indent, 'max depth reached')
+			return
+		end
+ 
         if (print_r_cache[tostring(t)]) then
             print(indent.."*"..tostring(t))
         else
@@ -19,7 +34,7 @@ SmashAndGrabUtils.print_r = function( t )
                 for pos,val in pairs(t) do
                     if (type(val)=="table") then
                         print(indent.."["..pos.."] => "..tostring(t).." {")
-                        sub_print_r(val,indent..string.rep(" ",string.len(pos)+8))
+                        sub_print_r(val,indent..string.rep(" ",string.len(pos)+8), depth - 1)
                         print(indent..string.rep(" ",string.len(pos)+6).."}")
                     elseif (type(val)=="string") then
                         print(indent.."["..pos..'] => "'..val..'"')
@@ -34,10 +49,10 @@ SmashAndGrabUtils.print_r = function( t )
     end
     if (type(t)=="table") then
         print(tostring(t).." {")
-        sub_print_r(t,"  ")
+        sub_print_r(t,"  ", depth)
         print("}")
     else
-        sub_print_r(t,"  ")
+        sub_print_r(t,"  ", depth)
     end
     print()
 end
@@ -52,4 +67,16 @@ SmashAndGrabUtils.createIndex = function(_table)
         index[value] = name
     end
     return index
+end
+
+SmashAndGrabUtils.defaultdict = function (default_value_factory)
+    local t = {}
+    local metatable = {}
+    metatable.__index = function(t, key)
+        if not rawget(t, key) then
+            rawset(t, key, default_value_factory(key))
+        end
+        return rawget(t, key)
+    end
+    return setmetatable(t, metatable)
 end
