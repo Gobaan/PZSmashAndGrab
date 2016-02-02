@@ -18,12 +18,23 @@ end
 
 SmashAndGrabQuickLoot.oldDoButtons = ISInventoryPane.doButtons
 function ISInventoryPane:doButtons(y)
-    if self.inventory == SmashAndGrabQuickLoot.trash[self.player] then
-        -- TODO: add Unmark button
-        return
+    -- TODO: add Unmark button
+    if self.inventory ~= SmashAndGrabQuickLoot.trash[self.player] then
+        SmashAndGrabQuickLoot.oldDoButtons(self, y)
     end
-    SmashAndGrabQuickLoot.oldDoButtons(self, y)
 end
+
+SmashAndGrabQuickLoot.oldSelectContainer = ISInventoryPage.selectContainer
+function ISInventoryPage:selectContainer(button)
+    if ISMouseDrag.dragging ~= nil and self.inventoryPane.inventory == SmashAndGrabQuickLoot.trash[self.player] then
+        print ("dragging from trash")
+        SmashAndGrabQuickLoot.onUnmarkItem(ISMouseDrag.dragging, self.player) 
+    else
+        print ("just kidding")
+        SmashAndGrabQuickLoot.oldSelectContainer(self, button)
+    end
+end
+
 
 local function onDragToTrash(self, button)
 	if ISMouseDrag.dragging ~= nil then

@@ -54,9 +54,10 @@ function SmashAndGrabQuickLoot.onMarkItem(_items, _player)
     	if not junkItems[_player][name] then
     	    local item = getItem(item)
     	    local clone = instanceItem(name)
+            clone:setModule(item:getModule())
     	    clone:setType(item:getType())
             SmashAndGrabQuickLoot.trash[_player]:AddItem(clone)
-            junkItems[_player][name] = true
+            junkItems[_player][name] = clone:getType()
     		marked = true
     	end
     end
@@ -126,8 +127,21 @@ end
 function SmashAndGrabQuickLoot.loadConfig()
     local reader = getModFileReader("SmashAndGrab", configName, true)
     local text = reader and reader:readLine() or '{}'
-    junkItems = JSON:decode(text)
+    local junk = JSON:decode(text)
     if reader then reader:close() end
+
+    
+    for player, contents in pairs(junk) do
+        player = tonumber(player)
+        print ("Loading ", player, contents)
+        for name, value in pairs(contents) do
+            print (player, name, value)
+            local clone = instanceItem(name)
+            clone:setType(value)
+            SmashAndGrabQuickLoot.trash[player]:AddItem(clone)
+            junkItems[player][name] = clone:getType()
+        end
+    end
 end
 
 function SmashAndGrabQuickLoot.saveConfig()
@@ -147,7 +161,7 @@ function SmashAndGrabQuickLoot.colorMarkedItems(self, doDragged)
     for k, item in ipairs(self.itemslist) do
         -- Go through each item in stack..
     	local isJunk = junkItems[self.player][getName(item)] 
-    	local count = self.collapsed[item.name] and 1 or #item.items
+    	local count = self.collapsed[getName(item)] and 1 or #item.items
         for n = 1, count do
                if isJunk then
                    self:drawRect(1, (y * self.itemHgt) + 16, self:getWidth(), self.itemHgt, 0.07, 0.5, 0.25, 0.25)
@@ -173,7 +187,7 @@ SmashAndGrabCustomEvent.addListener("ISInventoryPane:renderdetails")
 
 Events.OnFillInventoryObjectContextMenu.Add(SmashAndGrabQuickLoot.createMenu)
 Events.OnSave.Add(SmashAndGrabQuickLoot.saveConfig)
---Events.OnGameStart.Add(SmashAndGrabQuickLoot.loadConfig)
+Events.OnGameStart.Add(SmashAndGrabQuickLoot.loadConfig)
 Events.precreateWorld.Add(SmashAndGrabQuickLoot.getSaveName)
 Events.postLoadGameScreen_clickPlay.Add(SmashAndGrabQuickLoot.getConfigLoadedName)
 Events.postISInventoryTransferAction_perform.Add(SmashAndGrabQuickLoot.addXPForTransferring)
