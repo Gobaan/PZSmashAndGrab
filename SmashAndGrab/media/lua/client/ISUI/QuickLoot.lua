@@ -1,4 +1,14 @@
 SmashAndGrabQuickLoot = SmashAndGrabQuickLoot or {}
+local hotkey = 34 -- 'g'
+
+function SmashAndGrabQuickLoot.lootAll (_keyPressed)
+    if (_keyPressed ~= hotkey) then return end
+    local lootWindow = ISLayoutManager.windows["loot".."0"]
+    if not lootWindow or not lootWindow.target.javaObject:isVisible() then
+        return
+    end
+    lootWindow.funcs.lootAll()
+end
 
 local function makeTrash() 
     return ItemContainer.new("junk", nil, nil, 10, 10) 
@@ -7,7 +17,6 @@ end
 local function makeEmptyDict()
     return {}
 end
-
 
 local configName = ""
 local fetchSpeedBonus = 0.1 
@@ -51,6 +60,7 @@ function SmashAndGrabQuickLoot.onMarkItem(_items, _player)
 
     for _, item in ipairs(_items) do
      	name = getName(item)
+		print (name)
     	if not junkItems[_player][name] then
     	    local item = getItem(item)
     	    local clone = instanceItem(name)
@@ -130,12 +140,9 @@ function SmashAndGrabQuickLoot.loadConfig()
     local junk = JSON:decode(text)
     if reader then reader:close() end
 
-    
     for player, contents in pairs(junk) do
         player = tonumber(player)
-        print ("Loading ", player, contents)
         for name, value in pairs(contents) do
-            print (player, name, value)
             local clone = instanceItem(name)
             clone:setType(value)
             SmashAndGrabQuickLoot.trash[player]:AddItem(clone)
@@ -149,7 +156,6 @@ function SmashAndGrabQuickLoot.saveConfig()
     local text = JSON:encode(junkItems)
     local writer = getModFileWriter("SmashAndGrab", configName, true, false)
     if not writer then 
-        print ("SmashAndGrab: Error: Failed to save file " .. configName)
         return 
     end
     writer:write(text)
@@ -159,19 +165,17 @@ end
 function SmashAndGrabQuickLoot.colorMarkedItems(self, doDragged)
     local y = 0
     for k, item in ipairs(self.itemslist) do
-        -- Go through each item in stack..
     	local isJunk = junkItems[self.player][getName(item)] 
-    	local count = self.collapsed[getName(item)] and 1 or #item.items
+    	local count = self.collapsed[item.name] and 1 or #item.items
+
         for n = 1, count do
-               if isJunk then
-                   self:drawRect(1, (y * self.itemHgt) + 16, self:getWidth(), self.itemHgt, 0.07, 0.5, 0.25, 0.25)
-               end
-               y = y + 1
+            if isJunk then
+                self:drawRect(1, (y * self.itemHgt) + 16, self:getWidth(), self.itemHgt, 0.10, 0.5, 0.25, 0.25)
+            end
+            y = y + 1
     	end
    end
 end
-
--- Recipes do not check trash can
 
 function SmashAndGrabQuickLoot.getContinuedSaveName(gameMode, name)
     configName = "saves/QuickLoot_"..name
@@ -194,3 +198,45 @@ Events.postISInventoryTransferAction_perform.Add(SmashAndGrabQuickLoot.addXPForT
 Events.preISInventoryPage_createChildren.Add(SmashAndGrabQuickLoot.addQuickLootButton)
 Events.preMainScreen_continueLatestSave.Add(SmashAndGrabQuickLoot.getContinuedSaveName)
 Events.postISInventoryPane_renderdetails.Add(SmashAndGrabQuickLoot.colorMarkedItems)
+Events.OnKeyPressed.Add(SmashAndGrabQuickLoot.lootAll)
+
+
+function SmashAndGrabQuickLoot.doButtons(self, y)
+    if self.inventory == SmashAndGrabQuickLoot.trash[self.player] then
+		self.contextButton1:setVisible(true)
+		self.contextButton1:setTitle("Unmark")
+        self.contextButton1.mode = "Unmark Loot"
+    	self.contextButton2:setVisible(false)
+	else 
+		if self.contextButton2.mode ~= "Unmark Loot" and self.contextButton2.mode ~= "Mark Loot" then
+			self.contextButton3:setVisible(true)
+		  	self.contextButton3:setTitle(self.contextButton2:getTitle())
+          	self.contextButton3.mode = self.contextButton2.mode
+		end
+		
+		self.contextButton2:setVisible(true)
+		if junkItems[self.player][getName(self.items[y])] then
+		  self.contextButton2:setTitle("Unmark")
+          self.contextButton2.mode = "Unmark Loot"
+		else
+		  self.contextButton2:setTitle("Mark")
+          self.contextButton2.mode = "Mark Loot"
+		end
+    end
+end
+SmashAndGrabCustomEvent.addListener("ISInventoryPane:doButtons")
+SmashAndGrabCustomEvent.addListener("ISInventoryPane:onContext")
+
+function SmashAndGrabQuickLoot.markContext(self, button)
+	local markables = {self.items[self.buttonOption]}
+    if button.mode == "Mark Loot" then
+		SmashAndGrabQuickLoot.onMarkItem(markables, self.player)
+    end
+
+    if button.mode == "Unmark Loot" then
+		SmashAndGrabQuickLoot.onUnmarkItem(markables, self.player)
+    end
+end
+
+Events.postISInventoryPane_onContext.Add(SmashAndGrabQuickLoot.markContext)
+Events.postISInventoryPane_doButtons.Add(SmashAndGrabQuickLoot.doButtons)
