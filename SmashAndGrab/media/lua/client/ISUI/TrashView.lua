@@ -2,6 +2,7 @@
 -- update and view the state
 SmashAndGrabQuickLoot = SmashAndGrabQuickLoot or {}
 
+local hotkey = 34 -- 'g'
 local trashButton = nil
 local function onDragToTrash(self, button)
 	if ISMouseDrag.dragging ~= nil then

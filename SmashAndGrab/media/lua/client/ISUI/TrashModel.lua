@@ -1,6 +1,5 @@
 -- This file deals with morphing the underlying trash and junk items model to maintain the marked item states
 SmashAndGrabQuickLoot = SmashAndGrabQuickLoot or {}
-local hotkey = 34 -- 'g'
 local configName = ""
 local fetchSpeedBonus = 0.1 
 local lootXPMultiplier = 0.1
