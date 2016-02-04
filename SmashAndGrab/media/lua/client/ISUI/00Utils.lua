@@ -80,3 +80,16 @@ SmashAndGrabUtils.defaultdict = function (default_value_factory)
     end
     return setmetatable(t, metatable)
 end
+
+SmashAndGrabUtils.getItem = function(_item)
+    if instanceof(_item, "InventoryItem") then
+        return _item
+    elseif type(_item) == "table" then
+        return _item.items[2]
+    end
+end
+
+SmashAndGrabUtils.getName = function(_item)
+    item = SmashAndGrabUtils.getItem(_item)
+    return item:getModule() .. "." .. item:getType()
+end
