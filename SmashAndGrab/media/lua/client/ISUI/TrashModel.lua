@@ -22,7 +22,7 @@ function SmashAndGrabQuickLoot.onMarkItem(_items, _player)
     end
 
     for _, item in ipairs(_items) do
-         name = SmashAndGrabUtils.getName(item)
+        name = SmashAndGrabUtils.getName(item)
         if not SmashAndGrabQuickLoot.junkItems[_player][name] then
             local item = SmashAndGrabUtils.getItem(item)
             local clone = instanceItem(name)
