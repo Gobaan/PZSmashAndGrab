@@ -15,7 +15,7 @@ function SmashAndGrabWalkTo.removeOption(_context, name)
     for i=1,_context.numOptions - 1 do
         if _context.options[i].name ~= name then
             options[numOptions] = _context.options[i]
-	        options[numOptions].id = numOptions
+            options[numOptions].id = numOptions
             numOptions = numOptions + 1
         else
             menu = _context.options[i]

@@ -1,6 +1,6 @@
 SmashAndGrabUtils = {}
 
-SmashAndGrabUtils.removeValue = function( t, value )
+SmashAndGrabUtils.removeValue = function(t, value)
     for i=#t,1,-1 do
         if t[i] == value then
             table.remove(t, value)
@@ -8,33 +8,33 @@ SmashAndGrabUtils.removeValue = function( t, value )
     end
 end
 
-SmashAndGrabUtils.print_keys = function ( t )
-	for k, v in ipairs(t) do
-		print (k, v)
-	end
+SmashAndGrabUtils.printKeys = function (t)
+    for k, v in ipairs(t) do
+        print (k, v)
+    end
 end
 
-SmashAndGrabUtils.print_r = function( t, depth )  
-  	if not depth then 
-		depth = 1
-	end
+SmashAndGrabUtils.printR = function(t, depth)  
+      if not depth then 
+        depth = 1
+    end
 
-    local print_r_cache={}
-    local function sub_print_r(t,indent, depth)
+    local printR_cache={}
+    local function subPrintR(t, indent, depth)
         if depth == 0 then
-			print (indent, 'max depth reached')
-			return
-		end
+            print (indent, 'max depth reached')
+            return
+        end
  
-        if (print_r_cache[tostring(t)]) then
+        if (printR_cache[tostring(t)]) then
             print(indent.."*"..tostring(t))
         else
-            print_r_cache[tostring(t)]=true
+            printR_cache[tostring(t)]=true
             if (type(t)=="table") then
                 for pos,val in pairs(t) do
                     if (type(val)=="table") then
                         print(indent.."["..pos.."] => "..tostring(t).." {")
-                        sub_print_r(val,indent..string.rep(" ",string.len(pos)+8), depth - 1)
+                        subPrintR(val,indent..string.rep(" ",string.len(pos)+8), depth - 1)
                         print(indent..string.rep(" ",string.len(pos)+6).."}")
                     elseif (type(val)=="string") then
                         print(indent.."["..pos..'] => "'..val..'"')
@@ -49,10 +49,10 @@ SmashAndGrabUtils.print_r = function( t, depth )
     end
     if (type(t)=="table") then
         print(tostring(t).." {")
-        sub_print_r(t,"  ", depth)
+        subPrintR(t,"  ", depth)
         print("}")
     else
-        sub_print_r(t,"  ", depth)
+        subPrintR(t,"  ", depth)
     end
     print()
 end
@@ -69,12 +69,12 @@ SmashAndGrabUtils.createIndex = function(_table)
     return index
 end
 
-SmashAndGrabUtils.defaultdict = function (default_value_factory)
+SmashAndGrabUtils.defaultDict = function (defaultValueFactory)
     local t = {}
     local metatable = {}
     metatable.__index = function(t, key)
         if not rawget(t, key) then
-            rawset(t, key, default_value_factory(key))
+            rawset(t, key, defaultValueFactory(key))
         end
         return rawget(t, key)
     end

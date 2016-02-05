@@ -12,26 +12,26 @@ local function makeEmptyDict()
     return {}
 end
 
-SmashAndGrabQuickLoot.junkItems = SmashAndGrabUtils.defaultdict(makeEmptyDict)
-SmashAndGrabQuickLoot.trash = SmashAndGrabUtils.defaultdict(makeTrash)
+SmashAndGrabQuickLoot.junkItems = SmashAndGrabUtils.defaultDict(makeEmptyDict)
+SmashAndGrabQuickLoot.trash = SmashAndGrabUtils.defaultDict(makeTrash)
 
 function SmashAndGrabQuickLoot.onMarkItem(_items, _player)
     local marked = false
     if not _items then
-    	return false
+        return false
     end
 
     for _, item in ipairs(_items) do
-     	name = SmashAndGrabUtils.getName(item)
-    	if not SmashAndGrabQuickLoot.junkItems[_player][name] then
-    	    local item = SmashAndGrabUtils.getItem(item)
-    	    local clone = instanceItem(name)
+         name = SmashAndGrabUtils.getName(item)
+        if not SmashAndGrabQuickLoot.junkItems[_player][name] then
+            local item = SmashAndGrabUtils.getItem(item)
+            local clone = instanceItem(name)
             clone:setModule(item:getModule())
-    	    clone:setType(item:getType())
+            clone:setType(item:getType())
             SmashAndGrabQuickLoot.trash[_player]:AddItem(clone)
             SmashAndGrabQuickLoot.junkItems[_player][name] = clone:getType()
-    		marked = true
-    	end
+            marked = true
+        end
     end
     return marked
 end
@@ -41,8 +41,8 @@ function SmashAndGrabQuickLoot.onUnmarkItem(_items, _player)
     for _, item in ipairs(_items) do
         SmashAndGrabQuickLoot.junkItems[_player][SmashAndGrabUtils.getName(item)] = nil
         item = SmashAndGrabUtils.getItem(item)
-    	SmashAndGrabQuickLoot.trash[_player]:RemoveAll(item:getType())
-    	unmarked = true
+        SmashAndGrabQuickLoot.trash[_player]:RemoveAll(item:getType())
+        unmarked = true
     end
     return true
 end
