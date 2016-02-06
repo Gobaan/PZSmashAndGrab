@@ -2,8 +2,19 @@
 -- update and view the state
 SmashAndGrabQuickLoot = SmashAndGrabQuickLoot or {}
 
-local hotkey = 34 -- 'g'
+local grabHotkey = 34 -- 'g'
+local markTrashHotkey = 20 -- 't'
 local trashButton = nil
+
+local function markAll(self)
+    local items = self.inventory:getItems()
+    local itemTable = {}
+	for i=0, items:size() - 1 do
+        itemTable[i + 1] = items:get(i)
+	end
+	SmashAndGrabQuickLoot.onMarkItem(itemTable, self.player)
+end
+
 local function onDragToTrash(self, button)
     if ISMouseDrag.dragging ~= nil then
         SmashAndGrabQuickLoot.onMarkItem(ISMouseDrag.dragging, self.player)
@@ -138,13 +149,17 @@ function SmashAndGrabQuickLoot.markContext(self, button)
 end
 
 function SmashAndGrabQuickLoot.lootAll(_keyPressed)
-    if (_keyPressed ~= hotkey) then return end
-    -- TODO this only works for one player and for pc
     local lootWindow = ISLayoutManager.windows["loot".."0"]
     if not lootWindow or not lootWindow.target.javaObject:isVisible() then
         return
     end
-    lootWindow.funcs.lootAll()
+
+    if (_keyPressed == grabHotkey) then 
+        lootWindow.funcs.lootAll()
+    elseif (_keyPressed == markTrashHotkey) then 
+        local dummyPage = {inventory = lootWindow.target.inventory, player = 0}
+        markAll(dummyPage)
+    end
 end
 
 function SmashAndGrabQuickLoot.createMenu(_player, _context, _items)
@@ -167,14 +182,30 @@ function SmashAndGrabQuickLoot.createMenu(_player, _context, _items)
     _context:addOption("Unmark As Junk", _items, SmashAndGrabQuickLoot.onUnmarkItem, _player)
 end
 
+function SmashAndGrabQuickLoot.addMarkAll(self)
+    self.markAll = ISButton:new(self.toggleStove:getX(), -1, 50, 14, "Mark All", self, markAll);
+    self.markAll:initialise();
+    self.markAll.borderColor.a = 0.0;
+    self.markAll.backgroundColor.a = 0.0;
+    self.markAll.backgroundColorMouseOver.a = 0.7;
+    self:addChild(self.markAll);
+    self.markAll:setVisible(true);
+
+	self.toggleStove:setX(55 + 
+		getTextManager():MeasureStringX(UIFont.Small, getText("IGUI_invpage_Loot_all")) +
+		getTextManager():MeasureStringX(UIFont.Small, "Mark All"))
+end
+
 
 SmashAndGrabCustomEvent.addListener("ISInventoryPane:doButtons")
 SmashAndGrabCustomEvent.addListener("ISInventoryPane:onContext")
+SmashAndGrabCustomEvent.addListener("ISInventoryPage.createChildren")
 SmashAndGrabCustomEvent.addListener("ISInventoryPage:refreshBackpacks")
 SmashAndGrabCustomEvent.addListener("ISInventoryPane:renderdetails")
 
 Events.postISInventoryPage_refreshBackpacks.Add(SmashAndGrabQuickLoot.addTrashBin)
 Events.postISInventoryPane_renderdetails.Add(SmashAndGrabQuickLoot.colorMarkedItems)
+Events.postISInventoryPage_createChildren.Add(SmashAndGrabQuickLoot.addMarkAll)
 Events.postISInventoryPane_onContext.Add(SmashAndGrabQuickLoot.markContext)
 Events.postISInventoryPane_doButtons.Add(SmashAndGrabQuickLoot.doButtons)
 Events.OnKeyPressed.Add(SmashAndGrabQuickLoot.lootAll)
