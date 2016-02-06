@@ -168,7 +168,6 @@ function SmashAndGrabQuickLoot.createMenu(_player, _context, _items)
     local playerInv = getPlayerInventory(_player).inventory;
 
     for _, entry in ipairs(_items) do
-        SmashAndGrabUtils.printR(entry)
         if (entry.invPanel and entry.invPanel.inventory == trashContainer or entry.getContainer and entry:getContainer() == trashContainer) then
             _context:clear()
         end
