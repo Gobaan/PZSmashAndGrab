@@ -182,6 +182,10 @@ function SmashAndGrabQuickLoot.createMenu(_player, _context, _items)
 end
 
 function SmashAndGrabQuickLoot.addMarkAll(self)
+    if self.onCharacter then
+        return
+    end
+
     self.markAll = ISButton:new(self.toggleStove:getX(), -1, 50, 14, "Mark All", self, markAll);
     self.markAll:initialise();
     self.markAll.borderColor.a = 0.0;
