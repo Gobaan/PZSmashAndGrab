@@ -5,7 +5,7 @@ local skillBonus = 10
 local cleaningXP = 5
 
 local function canAddSheetRope(_player, _position, _window)
-    return _window ~= nil and _window:canAddSheetRope() and _position:getZ() > 0 and _window:getBarricade() == 0 and (_player:getInventory():getNumberOfItem("SheetRope") >= _window:countAddSheetRope() or _player:getInventory():getNumberOfItem("Rope") >= _window:countAddSheetRope()) and _player:getInventory():contains("Nails") 
+    return _window ~= nil and _window:canAddSheetRope() and _position:getZ() > 0 and not _window:getBarricadeForCharacter(_player) and (_player:getInventory():getNumberOfItem("SheetRope") >= _window:countAddSheetRope() or _player:getInventory():getNumberOfItem("Rope") >= _window:countAddSheetRope()) and _player:getInventory():contains("Nails") 
 end
 
 local function interactWithSheetRope(_player, _adjacent)
@@ -29,13 +29,17 @@ local function interactWithWindow(_player, _adjacent)
     if cleanTime <= skillBonus then
         cleanTime = skillBonus
     end
+    --_player:getBodyDamage():RestoreToFullHealth();
 
-    if window == nil or not SmashAndGrabPlayerUtils.Aligned(position, window) or window:getBarricade() ~= 0 then return false end
+    if window == nil or not SmashAndGrabPlayerUtils.Aligned(position, window) or window:getBarricadeForCharacter(_player) then return false end
     local targetSquare = position:Is(IsoFlagType.exterior) and window:getSquare() or window:getIndoorSquare()
+    print ("Square:")
+    print (targetSquare)
     if not luautils.walkAdjWindowOrDoor(_player, targetSquare, window) then 
         return false
     end
 
+    print ("unable to walk adjacent")
     if window:isSmashed() and not window:isGlassRemoved() then
         ISTimedActionQueue.add(ISRemoveBrokenGlass:new(_player, window, cleanTime))
         return true
@@ -47,6 +51,8 @@ local function interactWithWindow(_player, _adjacent)
         return true
     end
 
+    print ("unable to clear")
+
     if position:Is(IsoFlagType.exterior) and not window:isDestroyed() and not window:isSmashed() then
         _player:smashWindow(window)
         return true
@@ -57,6 +63,7 @@ local function interactWithWindow(_player, _adjacent)
         ISTimedActionQueue.add(ISAddSheetAction:new(_player, window, 50))
         return true
     end 
+    print ("Unable not exterior")
     return false
 end
 
