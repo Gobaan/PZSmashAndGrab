@@ -1,0 +1,6 @@
+version=1
+id=603863176
+title=Smash And Grab
+description=Adds Quick Loot and Smash window button. Removes walk to button.
+tags=
+visibility=public
