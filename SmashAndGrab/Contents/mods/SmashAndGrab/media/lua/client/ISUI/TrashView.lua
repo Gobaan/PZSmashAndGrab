@@ -111,22 +111,30 @@ function SmashAndGrabQuickLoot.addTrashBin(self)
 end
 
 function SmashAndGrabQuickLoot.doButtons(self, y)
+    local ypos = ((y-1)*self.itemHgt) + self.headerHgt
+    ypos = ypos + self:getYScroll()
+
     if self.inventory == SmashAndGrabQuickLoot.trash[self.player] then
         self.contextButton1:setVisible(true)
         self.contextButton1:setTitle("Unmark")
+        self.contextButton1:setWidthToTitle()
+        self.contextButton1:setX(self.column3)
+        self.contextButton1:setY(ypos)
         self.contextButton1.mode = "Unmark Loot"
         self.contextButton2:setVisible(false)
         self.contextButton3:setVisible(false)
         return
     end
 
-    if self.contextButton2.mode ~= "Unmark Loot" and self.contextButton2.mode ~= "Mark Loot" then
-        self.contextButton3:setVisible(true)
-          self.contextButton3:setTitle(self.contextButton2:getTitle())
-          self.contextButton3.mode = self.contextButton2.mode
+    self.contextButton2:setX(self.contextButton1:getRight() + 1)
+    self.contextButton2:setY(ypos)
+
+    local foundSecondButton = self.contextButton2.mode ~= "Unmark Loot" and self.contextButton2.mode ~= "Mark Loot" 
+    if foundSecondButton then
+        self.contextButton3:setTitle(self.contextButton2:getTitle())
+        self.contextButton3.mode = self.contextButton2.mode
     end
-    
-    self.contextButton2:setVisible(true)
+
     if SmashAndGrabQuickLoot.junkItems[self.player][SmashAndGrabUtils.getName(self.items[y])] then
       self.contextButton2:setTitle("Unmark")
       self.contextButton2.mode = "Unmark Loot"
@@ -134,7 +142,16 @@ function SmashAndGrabQuickLoot.doButtons(self, y)
       self.contextButton2:setTitle("Mark")
       self.contextButton2.mode = "Mark Loot"
     end
-    
+
+    self.contextButton2:setVisible(true)
+    self.contextButton2:setWidthToTitle()
+
+    if foundSecondButton then
+        self.contextButton3:setVisible(true)
+        self.contextButton3:setWidthToTitle()       
+        self.contextButton3:setX(self.contextButton2:getRight() + 1)
+        self.contextButton3:setY(ypos)
+    end
 end
 
 function SmashAndGrabQuickLoot.markContext(self, button)
